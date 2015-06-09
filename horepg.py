@@ -36,7 +36,7 @@ class XMLTVDocument(object):
     self.document.documentElement.setAttribute('source-info-name', 'UPC Horizon API')
     self.document.documentElement.setAttribute('generator-info-name', 'HorEPG v1.0')
     self.document.documentElement.setAttribute('generator-info-url', 'beralt.nl/horepg')
-  def addChannel(self, channel_id, display_name):
+  def addChannel(self, channel_id, display_name, icons):
     element = self.document.createElement('channel')
     element.setAttribute('id', channel_id)
 
@@ -58,6 +58,12 @@ class XMLTVDocument(object):
         dn_text = self.document.createTextNode(display_name)
         dn_element.appendChild(dn_text)
         element.appendChild(dn_element)
+
+    for icon in icons:
+      if icon['assetType'] == 'station-logo-large':
+        lu_element = self.document.createElement('icon')
+        lu_element.setAttribute('src', icon['url'])
+        element.appendChild(lu_element)
 
     self.document.documentElement.appendChild(element)
   def addProgramme(self, programme):
@@ -230,7 +236,7 @@ with TVHXMLTVSocket('/home/hts/.hts/tvheadend/epggrab/xmltv.sock') as tvh_client
       now = datetime.date.today().timetuple()
       nr = 0
       xmltv = XMLTVDocument()
-      xmltv.addChannel(channel_id, channel['title'])
+      xmltv.addChannel(channel_id, channel['title'], channel['images'])
       for i in range(0, 5):
         start = int((calendar.timegm(now) + 86400 * i) * 1000) # milis
         end = start + (86400 * 1000)
