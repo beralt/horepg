@@ -14,6 +14,8 @@ remappes NPO 1 HD to NPO 1. Note that although multiple display names are suppor
 
 Configuration of the wanted channels is done by adding and removing channels to the wanted_channels list. A preliminary list is available by default.
 
+The script attempts to switch to the 'hts' user, with its group set to 'video'. This is what is default on my system, so you might want to changes this to reflect your own setup.
+
 Usage
 -----
 
@@ -21,9 +23,11 @@ Execute
 
 $ python horepg.py
 
-as the user you are running TVHeadend as. This is probably the hts user.
+This would require some privileges to switch to the user that is running TVHeadend. The script daemonizes by default, and logging is using syslog().
 
 Improvements
 ------------
 
-This could use a daemon mode, while being able to drop privileges to that of the hts user. A systemd service file (or upstart) would be nice. It would be nice to stop the whole reconnecting for each channel thingy. Maybe this should be a proper xmltv parser.
+- A systemd service file (or upstart) would be nice.
+- It would be nice to stop the whole reconnecting for each channel thingy.
+- Maybe this should be a proper xmltv parser.
