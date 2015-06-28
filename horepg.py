@@ -2,6 +2,10 @@
 Download EPG data from Horizon and output XMLTV stuff
 """
 
+import os
+import syslog
+import pwd
+import grp
 import xml.dom.minidom
 import time
 import datetime
@@ -11,8 +15,49 @@ import json
 import socket
 import http.client
 
+def debug(msg):
+  syslog.syslog(msg)
+
 def debug_json(data):
-  print(json.dumps(data, sort_keys=True, indent=4))
+  debug(json.dumps(data, sort_keys=True, indent=4))
+
+def switch_user(uid = None, gid = None):
+  # set gid first
+  if gid is not None:
+    os.setgid(gid)
+  if uid is not None:
+    os.setuid(uid)
+
+def daemonize():
+  def fork_exit_parent():
+    try:
+      pid = os.fork()
+      if pid > 0:
+        # parent, so exit
+        sys.exit(0)
+    except OSError as exc:
+      sys.stderr.write('failed to fork parent process {:0}\n'.format(exc))
+      sys.exit(1)
+  def redirect_stream(source, target = None):
+    if target is None:
+      target_fd = os.open(os.devnull, os.O_RDWR)
+    else:
+      target_fd = target.fileno()
+    os.dup2(target_fd, source.fileno())
+
+  os.umask(0)
+  os.chdir('/')
+
+  fork_exit_parent()
+  os.setsid()
+  fork_exit_parent()
+
+  # redirect streams
+  sys.stdout.flush()
+  sys.stderr.flush()
+  redirect_stream(sys.stdin)
+  redirect_stream(sys.stdout)
+  redirect_stream(sys.stderr)
 
 class XMLTVDocument(object):
   # this renames some of the channels
@@ -103,11 +148,9 @@ class XMLTVDocument(object):
 
         self.document.documentElement.appendChild(element)
       else:
-        #raise Exception('The given program had no title')
-        print('The program had no title', file=sys.stderr)
+        debug('The program had no title')
     else:
-      #raise Exception('The listing had no program')
-      print('The listing had no program', file=sys.stderr)
+      debug('The listing had no program')
   def map_category(cat):
     if cat in XMLTVDocument.category_map:
       return XMLTVDocument.category_map[cat]
@@ -227,6 +270,17 @@ wanted_channels = ['NPO 1 HD',
            'BBC One HD',
            'BBC Two HD']
 
+# switch user and do daemonization
+try:
+  uid = pwd.getpwnam('hts').pw_uid
+  gid = grp.getgrnam('video').gr_gid
+except KeyError as exc:
+  debug('Unable to find the user and group id for daemonization')
+  sys.exit(1)
+
+switch_user(uid, gid)
+daemonize()
+
 with TVHXMLTVSocket('/home/hts/.hts/tvheadend/epggrab/xmltv.sock') as tvh_client:
   chmap = ChannelMap()
   listings = Listings()
@@ -241,7 +295,7 @@ with TVHXMLTVSocket('/home/hts/.hts/tvheadend/epggrab/xmltv.sock') as tvh_client
         start = int((calendar.timegm(now) + 86400 * i) * 1000) # milis
         end = start + (86400 * 1000)
         nr = nr + listings.obtain(xmltv, channel_id, start, end)
-        print('Added {:d} programmes for channel {:s}'.format(nr, channel['title']), file=sys.stderr)
+      debug('Adding {:d} programmes for channel {:s}'.format(nr, channel['title']))
       # send this channel to tvh for processing
       tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
 
