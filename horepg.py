@@ -270,17 +270,6 @@ wanted_channels = ['NPO 1 HD',
            'BBC One HD',
            'BBC Two HD']
 
-# switch user and do daemonization
-try:
-  uid = pwd.getpwnam('hts').pw_uid
-  gid = grp.getgrnam('video').gr_gid
-except KeyError as exc:
-  debug('Unable to find the user and group id for daemonization')
-  sys.exit(1)
-
-switch_user(uid, gid)
-daemonize()
-
 def run_import(wanted_channels):
   with TVHXMLTVSocket('/home/hts/.hts/tvheadend/epggrab/xmltv.sock') as tvh_client:
     chmap = ChannelMap()
@@ -301,6 +290,17 @@ def run_import(wanted_channels):
         tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
 
 if __name__ == '__main__':
+  # switch user and do daemonization
+  try:
+    uid = pwd.getpwnam('hts').pw_uid
+    gid = grp.getgrnam('video').gr_gid
+  except KeyError as exc:
+    debug('Unable to find the user and group id for daemonization')
+    sys.exit(1)
+
+  switch_user(uid, gid)
+  daemonize()
+
   while True:
     run_import(wanted_channels)
     time.sleep(60*60*24)
