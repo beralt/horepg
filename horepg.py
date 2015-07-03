@@ -3,7 +3,8 @@ Download EPG data from Horizon and output XMLTV stuff
 """
 
 import os
-import syslog
+import logging
+import logging.handlers
 import pwd
 import grp
 import xml.dom.minidom
@@ -16,7 +17,7 @@ import socket
 import http.client
 
 def debug(msg):
-  syslog.syslog(msg)
+  logging.debug(msg)
 
 def debug_json(data):
   debug(json.dumps(data, sort_keys=True, indent=4))
@@ -290,6 +291,7 @@ def run_import(wanted_channels):
         tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
 
 if __name__ == '__main__':
+  logging.basicConfig(level=logging.DEBUG)
   # switch user and do daemonization
   try:
     uid = pwd.getpwnam('hts').pw_uid
@@ -299,6 +301,8 @@ if __name__ == '__main__':
     sys.exit(1)
 
   switch_user(uid, gid)
+  # switch to syslog
+  logging.basicConfig(stream=logging.handlers.SysLogHandler())
   daemonize()
 
   while True:
