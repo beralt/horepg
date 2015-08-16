@@ -19,4 +19,7 @@ if __name__ == '__main__':
         end = start + (86400 * 1000)
         nr = nr + listings.obtain(xmltv, channel_id, start, end)
       debug('Added {:d} programmes for channel {:s}'.format(nr, channel['title']))
-  print(xmltv.document.toprettyxml())
+      
+f = open( 'tvguide.xml', 'w', encoding='UTF-8' )
+f.write( xmltv.document.toprettyxml() )
+f.close()
