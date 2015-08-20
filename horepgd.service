@@ -1,0 +1,9 @@
+[Unit]
+Description=EPG update service
+After=tvheadend.service
+Requires=tvheadend.service
+ 
+[Service]
+Type=forking
+PIDFile=/var/run/horepgd.pid
+ExecStart=/usr/local/bin/horepgd.py
