@@ -15,7 +15,7 @@ import logging.handlers
 from horepg import *
 
 # configuration
-pid_filename = '/var/run/horepg.pid'
+pid_filename = '/var/run/horepgd.pid'
 wanted_channels = ['NPO 1 HD',
            'NPO 2 HD',
            'NPO 3 HD',
