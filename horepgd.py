@@ -14,6 +14,38 @@ import logging.handlers
 
 from horepg import *
 
+# configuration
+pid_filename = '/var/run/horepg.pid'
+wanted_channels = ['NPO 1 HD',
+           'NPO 2 HD',
+           'NPO 3 HD',
+           'RTL 4 HD',
+           'RTL 5 HD',
+           'SBS6 HD',
+           'RTL 7 HD',
+           'Veronica HD / Disney XD',
+           'Net5 HD',
+           'RTL 8 HD',
+           'FOX HD',
+           'Ziggo TV',
+           'Zender van de Maand',
+           'Comedy Central HD',
+           'Nickelodeon HD',
+           'Disney Channel',
+           'Discovery HD',
+           'National Geographic Channel HD',
+           'SBS9 HD',
+           'Eurosport HD',
+           'TLC HD',
+           '13TH Street HD',
+           'MTV HD',
+           '24Kitchen HD',
+           'één HD',
+           'Canvas HD',
+           'Ketnet',
+           'BBC One HD',
+           'BBC Two HD']
+
 def switch_user(uid = None, gid = None):
   # set gid first
   if gid is not None:
@@ -52,36 +84,6 @@ def daemonize():
   redirect_stream(sys.stdout)
   redirect_stream(sys.stderr)
 
-wanted_channels = ['NPO 1 HD',
-           'NPO 2 HD',
-           'NPO 3 HD',
-           'RTL 4 HD',
-           'RTL 5 HD',
-           'SBS6 HD',
-           'RTL 7 HD',
-           'Veronica HD / Disney XD',
-           'Net5 HD',
-           'RTL 8 HD',
-           'FOX HD',
-           'Ziggo TV',
-           'Zender van de Maand',
-           'Comedy Central HD',
-           'Nickelodeon HD',
-           'Disney Channel',
-           'Discovery HD',
-           'National Geographic Channel HD',
-           'SBS9 HD',
-           'Eurosport HD',
-           'TLC HD',
-           '13TH Street HD',
-           'MTV HD',
-           '24Kitchen HD',
-           'één HD',
-           'Canvas HD',
-           'Ketnet',
-           'BBC One HD',
-           'BBC Two HD']
-
 def run_import(wanted_channels):
   with TVHXMLTVSocket('/home/hts/.hts/tvheadend/epggrab/xmltv.sock') as tvh_client:
     chmap = ChannelMap()
@@ -111,10 +113,16 @@ if __name__ == '__main__':
     debug('Unable to find the user and group id for daemonization')
     sys.exit(1)
 
+  pid_fd = open(pid_filename, 'w')
+
   switch_user(uid, gid)
   # switch to syslog
   logging.basicConfig(stream=logging.handlers.SysLogHandler())
   daemonize()
+
+  pid = str(os.getpid())
+  pid_fd.write(pid + '\n')
+  pid_fd.close()
 
   while True:
     run_import(wanted_channels)
