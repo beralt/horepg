@@ -8,3 +8,6 @@ Type=forking
 Nice=19
 ExecStart=/usr/local/bin/horepgd.py
 PIDFile=/var/run/horepgd.pid
+
+[Install]
+WantedBy=multi-user.target
