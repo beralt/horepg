@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Download EPG data from Horizon and output XMLTV stuff
 """
