@@ -243,7 +243,7 @@ class Listings(object):
   """
   def __init__(self):
     self.conn = http.client.HTTPSConnection(Listings.host)
-  def obtain(self, xmltv, channel_id, start = False, end = False):
+  def obtain(self, xmltv, channel_id, start = False, end = False, retry = True):
     if start == False:
       start = int(time.time() * 1000)
     if end == False:
@@ -252,6 +252,10 @@ class Listings(object):
     self.conn.request('GET', self.path)
     response = self.conn.getresponse()
     if response.status != 200:
+      if retry:
+        # give the server a bit of time to recover
+        time.sleep(1)
+        return self.obtain(xmltv, channel_id, start, end, False)
       raise Exception('Failed to GET listings url:', response.status, response.reason)
     return self.parse(response.read(), xmltv)
   def parse(self, raw, xmltv):
