@@ -19,11 +19,19 @@ The script attempts to switch to the 'hts' user, with its group set to 'video'. 
 Usage
 -----
 
-Execute
+usage: horepgd.py [-h] [-s [PATH]] [-p [PATH]] [-u [USER]] [-g [GROUP]] [-d]
 
-$ python horepg.py
+Fetches EPG data from the Horizon service and passes it to TVHeadend.
 
-This would require some privileges to switch to the user that is running TVHeadend. The script daemonizes by default, and logging is using syslog().
+optional arguments:
+  -h, --help  show this help message and exit
+  -s [PATH]   path to TVHeadend XMLTV socket
+  -p [PATH]   path to PID file
+  -u [USER]   run as USER
+  -g [GROUP]  run as GROUP
+  -d          daemonize
+
+This would require some privileges to switch to the user and group if daemonizing. The script daemonizes by default, and logging is using syslog().
 
 Improvements
 ------------
