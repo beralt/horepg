@@ -3,7 +3,7 @@
 PACKAGE_DIR="/var/packages/$SYNOPKG_PKGNAME"
 INSTALL_DIR="${PACKAGE_DIR}/target"
 PATH="/usr/local/bin:/bin:/usr/bin:/usr/syno/bin"
-USER="tvheadend"
+USER="tvheadend-testing"
 GROUP="users"
 HOREPGD="${INSTALL_DIR}/horepgd.py"
 PID_FILE="${INSTALL_DIR}/horepgd.pid"
@@ -45,21 +45,21 @@ wait_for_status ()
 case $1 in
     start)
         if daemon_status; then
-            echo ${DNAME} is already running
+            echo ${SYNOPKG_PKGNAME} is already running
             exit 0
         else
-            echo Starting ${DNAME} ...
+            echo Starting ${SYNOPKG_PKGNAME} ...
             start_daemon
             exit $?
         fi
         ;;
     stop)
         if daemon_status; then
-            echo Stopping ${DNAME} ...
+            echo Stopping ${SYNOPKG_PKGNAME} ...
             stop_daemon
             exit $?
         else
-            echo ${DNAME} is not running
+            echo ${SYNOPKG_PKGNAME} is not running
             exit 0
         fi
         ;;
@@ -70,10 +70,10 @@ case $1 in
         ;;
     status)
         if daemon_status; then
-            echo ${DNAME} is running
+            echo ${SYNOPKG_PKGNAME} is running
             exit 0
         else
-            echo ${DNAME} is not running
+            echo ${SYNOPKG_PKGNAME} is not running
             exit 1
         fi
         ;;
