@@ -11,11 +11,11 @@ import pwd
 import grp
 import logging
 import logging.handlers
+import argparse
 
 from horepg import *
 
 # configuration
-pid_filename = '/var/run/horepgd.pid'
 wanted_channels = ['NPO 1 HD',
            'NPO 2 HD',
            'NPO 3 HD',
@@ -84,8 +84,8 @@ def daemonize():
   redirect_stream(sys.stdout)
   redirect_stream(sys.stderr)
 
-def run_import(wanted_channels):
-  with TVHXMLTVSocket('/home/hts/.hts/tvheadend/epggrab/xmltv.sock') as tvh_client:
+def run_import(wanted_channels, tvhsocket):
+  with TVHXMLTVSocket(tvhsocket) as tvh_client:
     chmap = ChannelMap()
     listings = Listings()
     # add listings for each of the channels
@@ -104,26 +104,37 @@ def run_import(wanted_channels):
         tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
 
 if __name__ == '__main__':
+  parser = argparse.ArgumentParser(description='Fetches EPG data from the Horizon service and passes it to TVHeadend.')
+  parser.add_argument('-s', nargs='?', metavar='PATH', dest='tvhsocket', default='/home/hts/.hts/tvheadend/epggrab/xmltv.sock', type=str, help='path to TVHeadend XMLTV socket')
+  parser.add_argument('-p', nargs='?', metavar='PATH', dest='pid_filename', default='/var/run/horepgd.pid', type=str, help='path to PID file')
+  parser.add_argument('-u', nargs='?', metavar='USER', dest='as_user', default='hts', type=str, help='run as USER')
+  parser.add_argument('-g', nargs='?', metavar='GROUP', dest='as_group', default='video', type=str, help='run as GROUP')
+  parser.add_argument('-d', dest='daemonize', action='store_const', const=True, default=False, help='daemonize')
+  args = parser.parse_args()
+  
   logging.basicConfig(level=logging.DEBUG)
-  # switch user and do daemonization
-  try:
-    uid = pwd.getpwnam('hts').pw_uid
-    gid = grp.getgrnam('video').gr_gid
-  except KeyError as exc:
-    debug('Unable to find the user and group id for daemonization')
-    sys.exit(1)
+  if(args.daemonize):
+    # switch user and do daemonization
+    try:
+      uid = pwd.getpwnam(args.as_user).pw_uid
+      gid = grp.getgrnam(args.as_group).gr_gid
+    except KeyError as exc:
+      debug('Unable to find the user {:} and group {:} for daemonization'.format(args.as_user, args.as_group))
+      sys.exit(1)
 
-  pid_fd = open(pid_filename, 'w')
+    pid_fd = open(args.pid_filename, 'w')
 
-  switch_user(uid, gid)
-  # switch to syslog
-  logging.basicConfig(stream=logging.handlers.SysLogHandler())
-  daemonize()
+    switch_user(uid, gid)
+    # switch to syslog
+    logging.basicConfig(stream=logging.handlers.SysLogHandler())
+    daemonize()
+  else:
+    pid_fd = open(args.pid_filename, 'w')
 
   pid = str(os.getpid())
   pid_fd.write(pid + '\n')
   pid_fd.close()
 
   while True:
-    run_import(wanted_channels)
+    run_import(wanted_channels, args.tvhsocket)
     time.sleep(60*60*24)
