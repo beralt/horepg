@@ -7,10 +7,12 @@ USER="tvheadend"
 GROUP="users"
 HOREPGD="${INSTALL_DIR}/horepgd.py"
 PID_FILE="${INSTALL_DIR}/horepgd.pid"
+# hope you use tvheadend-testing
+XMLTVSOCKET="/usr/local/tvheadend-testing/var/epggrab/xmltv.sock"
 
 start_daemon ()
 {
-    python3 ${HOREPGD} -d -p ${PID_FILE} -u ${USER} -g ${GROUP}
+    python3 ${HOREPGD} -d -p ${PID_FILE} -u ${USER} -g ${GROUP} -s ${XMLTVSOCKET}
 }
 
 stop_daemon ()
