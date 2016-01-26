@@ -1,0 +1,7 @@
+package="HorEPG"
+version="1.0"
+description="Parses Horizon EPG data and pushes XMLTV data to TVHeadend"
+support_url="https://github.com/beralt/horepg"
+maintainer="Beralt Meppelink"
+arch="noarch"
+install_dep_packages="python3"
