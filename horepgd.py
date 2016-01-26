@@ -119,7 +119,7 @@ if __name__ == '__main__':
       uid = pwd.getpwnam(args.as_user).pw_uid
       gid = grp.getgrnam(args.as_group).gr_gid
     except KeyError as exc:
-      debug('Unable to find the user {:} and group {:} for daemonization'.format(args.as_user, args.as_group))
+      debug('Unable to find the user {0} and group {1} for daemonization'.format(args.as_user, args.as_group))
       sys.exit(1)
 
     pid_fd = open(args.pid_filename, 'w')
