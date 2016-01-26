@@ -6,7 +6,7 @@ Requires=tvheadend.service
 [Service]
 Type=forking
 Nice=19
-ExecStart=/usr/local/bin/horepgd.py
+ExecStart=/usr/local/bin/horepgd.py -d -u hts -g video -p /var/run/horepgd.pid
 PIDFile=/var/run/horepgd.pid
 
 [Install]
