@@ -14,6 +14,7 @@ import logging.handlers
 import argparse
 
 from horepg import *
+from tvheadend import *
 
 # configuration
 wanted_channels = ['NPO 1 HD',
@@ -110,6 +111,7 @@ if __name__ == '__main__':
   parser.add_argument('-u', nargs='?', metavar='USER', dest='as_user', default='hts', type=str, help='run as USER')
   parser.add_argument('-g', nargs='?', metavar='GROUP', dest='as_group', default='video', type=str, help='run as GROUP')
   parser.add_argument('-d', dest='daemonize', action='store_const', const=True, default=False, help='daemonize')
+  parser.add_argument('-tvh', dest='tvh_host', metavar = 'HOST', default = 'localhost', help='the hostname of TVHeadend to fetch channels from')
   args = parser.parse_args()
   
   logging.basicConfig(level=logging.DEBUG)
@@ -135,6 +137,9 @@ if __name__ == '__main__':
   pid_fd.write(pid + '\n')
   pid_fd.close()
 
+  channels = tvh_get_channels(args.tvh_host)
+  debug('Fetching listings for {:d} channels'.format(len(channels)))
+
   while True:
-    run_import(wanted_channels, args.tvhsocket)
+    run_import(channels, args.tvhsocket)
     time.sleep(60*60*24)
