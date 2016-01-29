@@ -6,13 +6,7 @@ This simple script parses EPG data from the service at horizon.tv (which is used
 Configuration
 -------------
 
-You should select the channels by modifying the script a bit. Note that channel display names have to match the ones in your TVHeadend configuration for this to work. There is a variable called add_display_name in the XMLTVDocument class to help with remapping. Setting this to:
-
-  add_display_name = {'NPO 1 HD': ['NPO 1']}
-
-remappes NPO 1 HD to NPO 1. Note that although multiple display names are supported by XMLTV this is not the case for TVHeadend.
-
-Configuration of the wanted channels is done by adding and removing channels to the wanted_channels list. A preliminary list is available by default.
+The script attempts to fetch a list of channels from TVHeadend using the JSON API. The current implementation requires that you allow the host running HorEPG access without authentication (this usually means allowing localhost), since there is no support for authentication at the moment.
 
 The script attempts to switch to the 'hts' user, with its group set to 'video'. This is what is default on my system, so you might want to changes this to reflect your own setup.
 
