@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SRCS="../horepg.py ../horepgd.py"
+SRCS="../horepg.py ../horepgd.py ../tvheadend.py"
 GPG=gpg2
 GPG_OPTS="--ignore-time-conflict --ignore-valid-from --yes --batch"
 

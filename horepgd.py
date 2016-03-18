@@ -81,6 +81,8 @@ if __name__ == '__main__':
   parser.add_argument('-g', nargs='?', metavar='GROUP', dest='as_group', default='video', type=str, help='run as GROUP')
   parser.add_argument('-d', dest='daemonize', action='store_const', const=True, default=False, help='daemonize')
   parser.add_argument('-tvh', dest='tvh_host', metavar = 'HOST', default = 'localhost', help='the hostname of TVHeadend to fetch channels from')
+  parser.add_argument('-tvh_username', dest='tvh_username', metavar = 'USERNAME', type=str, default = '', help='the username used to login into TVHeadend')
+  parser.add_argument('-tvh_password', dest='tvh_password', metavar = 'PASSWORD', type=str, default = '', help='the password used to login into TVHeadend')
   args = parser.parse_args()
   
   logging.basicConfig(level=logging.DEBUG)
@@ -106,7 +108,7 @@ if __name__ == '__main__':
   pid_fd.write(pid + '\n')
   pid_fd.close()
 
-  channels = tvh_get_channels(args.tvh_host)
+  channels = tvh_get_channels(args.tvh_host, username=args.tvh_username, password=args.tvh_password)
   debug('Fetching listings for {:d} channels'.format(len(channels)))
 
   while True:
