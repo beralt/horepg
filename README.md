@@ -14,6 +14,11 @@ The script attempts to switch to the 'hts' user, with its group set to 'video'. 
 
 The script daemonizes by default, and waits 24 hours before fetching a new batch of data.
 
+Dependencies
+------------
+
+The only dependency is the Requests package, required for Basic Authentication for authentication in TVHeadend.
+
 Usage
 -----
 
