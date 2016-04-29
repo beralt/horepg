@@ -202,7 +202,7 @@ class XMLTVDocument(object):
     return time.strftime('%Y%m%d%H%M%S', time.gmtime(t))
 
 class ChannelMap(object):
-  host = 'www.horizon.tv'
+  host = 'web-api-salt.horizon.tv'
   path = '/oesp/api/NL/nld/web/channels/'
   
   def __init__(self):
@@ -235,7 +235,7 @@ class ChannelMap(object):
     return False
 
 class Listings(object):
-  host = 'www.horizon.tv'
+  host = 'web-api-salt.horizon.tv'
   path = '/oesp/api/NL/nld/web/listings'
 
   """
