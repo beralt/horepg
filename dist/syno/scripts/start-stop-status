@@ -5,6 +5,9 @@ INSTALL_DIR="${PACKAGE_DIR}/target"
 PATH="/usr/local/bin:/bin:/usr/bin:/usr/syno/bin"
 USER="tvheadend-testing"
 GROUP="users"
+# set these to the correct values if you use ACL in TVH
+TVHUSER=""
+TVHPASSWORD=""
 HOREPGD="${INSTALL_DIR}/horepgd.py"
 PID_FILE="${INSTALL_DIR}/horepgd.pid"
 # hope you use tvheadend-testing
@@ -12,7 +15,7 @@ XMLTVSOCKET="/usr/local/tvheadend-testing/var/epggrab/xmltv.sock"
 
 start_daemon ()
 {
-    python3 ${HOREPGD} -d -p ${PID_FILE} -u ${USER} -g ${GROUP} -s ${XMLTVSOCKET}
+    python3 ${HOREPGD} -d -p ${PID_FILE} -u ${USER} -g ${GROUP} -s ${XMLTVSOCKET} -tvh_username ${TVHUSER} -tvh_password ${TVHPASSWORD}
 }
 
 stop_daemon ()
