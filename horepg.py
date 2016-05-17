@@ -201,18 +201,39 @@ class XMLTVDocument(object):
   def convert_time(t):
     return time.strftime('%Y%m%d%H%M%S', time.gmtime(t))
 
+class HorizonRequest(object):
+  hosts = ['web-api-salt.horizon.tv', 'web-api-salt.horizon.tv']
+
+  def __init__(self):
+    self.current = 0;
+    self.connection = http.client.HTTPSConnection(HorizonRequest.hosts[self.current])
+
+  def request(self, method, path):
+    self.connection.request(method, path)
+    response = self.connection.getresponse()
+    if(response.status == 200):
+      return response
+    elif(response.status == 403):
+      # switch hosts
+      if(self.current == 0):
+        self.current = 1
+      else:
+        self.current = 0
+      self.connection = http.client.HTTPSConnection(HorizonRequest.hosts[self.current])
+    else:
+      debug('Failed to request data from Horizon API, HTTP status {:0}'.format(response.status))
+    return False
+
 class ChannelMap(object):
-  host = 'web-api-pepper.horizon.tv'
   path = '/oesp/api/NL/nld/web/channels/'
   
   def __init__(self):
-    conn = http.client.HTTPSConnection(ChannelMap.host)
-    conn.request('GET', ChannelMap.path)
-    response = conn.getresponse()
-    if(response.status == 200):
+    self.horizon_request = HorizonRequest()
+    response = self.horizon_request.request('GET', ChannelMap.path)
+    if(response):
       raw = response.read()
     else:
-      raise Exception('Failed to GET channel url')
+      raise Exception('Failed to get data from Horizon API, HTTP status {:d}'.format(response.status))
     # load json
     data = json.loads(raw.decode('utf-8'))
     #setup channel map
@@ -235,29 +256,24 @@ class ChannelMap(object):
     return False
 
 class Listings(object):
-  host = 'web-api-pepper.horizon.tv'
   path = '/oesp/api/NL/nld/web/listings'
 
   """
   Defaults to only few days for given channel
   """
   def __init__(self):
-    self.conn = http.client.HTTPSConnection(Listings.host)
+    self.horizon_request = HorizonRequest()
   def obtain(self, xmltv, channel_id, start = False, end = False, retry = True):
     if start == False:
       start = int(time.time() * 1000)
     if end == False:
       end = start + (86400 * 2 * 1000)
-    self.path = Listings.path + '?byStationId=' + channel_id + '&byStartTime=' + str(start) + '~' + str(end) + '&sort=startTime'
-    self.conn.request('GET', self.path)
-    response = self.conn.getresponse()
-    if response.status != 200:
-      if retry:
-        # give the server a bit of time to recover
-        time.sleep(1)
-        return self.obtain(xmltv, channel_id, start, end, False)
+    path = Listings.path + '?byStationId=' + channel_id + '&byStartTime=' + str(start) + '~' + str(end) + '&sort=startTime'
+    response = self.horizon_request.request('GET', path)
+    if(response):
+      return self.parse(response.read(), xmltv)
+    else:
       raise Exception('Failed to GET listings url:', response.status, response.reason)
-    return self.parse(response.read(), xmltv)
   def parse(self, raw, xmltv):
     # parse raw data
     data = json.loads(raw.decode('utf-8'))
