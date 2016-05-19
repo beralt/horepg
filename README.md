@@ -6,6 +6,7 @@ This simple script parses EPG data from the service at horizon.tv (which is used
 The script fetches a channel list from TVHeadend, and tries to match channels found in the Horizon data to channels found in TVHeadend. As long as you keep the channel names as provided on the DVB-C network a match is very likely, and no configuration is required.
 
 EPG data for radio channels is added using oorboekje.nl as source. This is disabled by default, and enabled by passing the '-R' option on the commandline.
+j
 
 Configuration
 -------------
@@ -16,10 +17,21 @@ The script attempts to switch to the 'hts' user, with its group set to 'video'. 
 
 The script daemonizes by default, and waits 24 hours before fetching a new batch of data.
 
+
 Dependencies
 ------------
 
 The only dependency is the Requests package, required for Basic Authentication for authentication in TVHeadend.
+
+
+Installation
+------------
+
+Use setuptools to install HorEPG:
+
+```
+python setup.py install
+```
 
 Usage
 -----
