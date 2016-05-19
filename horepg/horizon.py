@@ -11,7 +11,7 @@ import calendar
 import json
 import http.client
 
-from xmltvdoc import *
+from .xmltvdoc import *
 
 def debug(msg):
   logging.debug(msg)

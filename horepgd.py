@@ -13,10 +13,10 @@ import logging
 import logging.handlers
 import argparse
 
-from horepg import *
-from oorboekje import *
-from tvheadend import *
-from xmltvdoc import *
+from horepg.horizon import *
+from horepg.oorboekje import *
+from horepg.tvheadend import *
+from horepg.xmltvdoc import *
 
 def switch_user(uid = None, gid = None):
   # set gid first

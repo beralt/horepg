@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from horepg import *
+from horepg.horizon import *
 import logging
 
 # the wanted channels

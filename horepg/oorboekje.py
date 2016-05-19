@@ -9,8 +9,8 @@ import time
 import logging
 
 from html.parser import HTMLParser
-from xmltvdoc import *
-from tvheadend import *
+from .xmltvdoc import *
+from .tvheadend import *
 
 def debug(msg):
   logging.debug(msg)
