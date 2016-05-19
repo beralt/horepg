@@ -56,7 +56,7 @@ def daemonize():
   redirect_stream(sys.stdout)
   redirect_stream(sys.stderr)
 
-def run_import(wanted_channels, tvhsocket):
+def run_import(wanted_channels, tvhsocket, fetch_radio=False):
   with TVHXMLTVSocket(tvhsocket) as tvh_client:
     # the Horizon API for TV channels
     chmap = ChannelMap()
@@ -82,10 +82,11 @@ def run_import(wanted_channels, tvhsocket):
         # send this channel to tvh for processing
         tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
     # Oorboekje for radio channels
-    parser = OorboekjeParser()
-    for i in range(0, 5):
-      start = time.time() + i*86400 + 100
-      tvh_client.send(parser.get_day(start))
+    if fetch_radio:
+      parser = OorboekjeParser()
+      for i in range(0, 5):
+        start = time.time() + i*86400 + 100
+        tvh_client.send(parser.get_day(start))
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Fetches EPG data from the Horizon service and passes it to TVHeadend.')
@@ -97,6 +98,7 @@ if __name__ == '__main__':
   parser.add_argument('-tvh', dest='tvh_host', metavar = 'HOST', default = 'localhost', help='the hostname of TVHeadend to fetch channels from')
   parser.add_argument('-tvh_username', dest='tvh_username', metavar = 'USERNAME', type=str, default = '', help='the username used to login into TVHeadend')
   parser.add_argument('-tvh_password', dest='tvh_password', metavar = 'PASSWORD', type=str, default = '', help='the password used to login into TVHeadend')
+  parser.add_argument('-R', dest='do_radio_epg', action='store_const', const=True, default=False, help='fetch EPG data for radio channels')
   args = parser.parse_args()
   
   logging.basicConfig(level=logging.DEBUG)
@@ -126,5 +128,5 @@ if __name__ == '__main__':
   debug('Fetching listings for {:d} channels'.format(len(channels)))
 
   while True:
-    run_import(channels, args.tvhsocket)
+    run_import(channels, args.tvhsocket, args.do_radio_epg)
     time.sleep(60*60*24)
