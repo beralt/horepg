@@ -14,7 +14,9 @@ import logging.handlers
 import argparse
 
 from horepg import *
+from oorboekje import *
 from tvheadend import *
+from xmltvdoc import *
 
 def switch_user(uid = None, gid = None):
   # set gid first
@@ -56,6 +58,7 @@ def daemonize():
 
 def run_import(wanted_channels, tvhsocket):
   with TVHXMLTVSocket(tvhsocket) as tvh_client:
+    # the Horizon API for TV channels
     chmap = ChannelMap()
     listings = Listings()
     # add listings for each of the channels
@@ -64,7 +67,13 @@ def run_import(wanted_channels, tvhsocket):
         now = datetime.date.today().timetuple()
         nr = 0
         xmltv = XMLTVDocument()
-        xmltv.addChannel(channel_id, channel['title'], channel['images'])
+        # channel logo
+        icon = None
+        for asset in channel['images']:
+          if asset['assetType'] == 'station-logo-large':
+            icon = asset['url']
+            break
+        xmltv.addChannel(channel_id, channel['title'], icon)
         for i in range(0, 5):
           start = int((calendar.timegm(now) + 86400 * i) * 1000) # milis
           end = start + (86400 * 1000)
@@ -72,6 +81,11 @@ def run_import(wanted_channels, tvhsocket):
         debug('Adding {:d} programmes for channel {:s}'.format(nr, channel['title']))
         # send this channel to tvh for processing
         tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
+    # Oorboekje for radio channels
+    parser = OorboekjeParser()
+    for i in range(0, 5):
+      start = time.time() + i*86400 + 100
+      tvh_client.send(parser.get_day(start))
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser(description='Fetches EPG data from the Horizon service and passes it to TVHeadend.')

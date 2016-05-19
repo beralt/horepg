@@ -2,9 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from horepg import *
+import logging
 
 # the wanted channels
-wanted_channels = ['NPO 1 HD']
+wanted_channels = ['TV Oost', 'ARD HD', '13TH Street HD', 'ZDF HD']
+
+logging.basicConfig(level=logging.DEBUG)
 
 if __name__ == '__main__':
   with open('tvguide.xml', 'w', encoding='UTF-8') as fd:
