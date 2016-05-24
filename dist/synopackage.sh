@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SRCS="../horepg.py ../horepgd.py ../tvheadend.py ../oorboekje.py ../xmltvdoc.py"
+SRCS="../horepg/horizon.py ../horepgd.py ../horepg/tvheadend.py ../horepg/oorboekje.py ../horepg/xmltvdoc.py"
 GPG=gpg2
 GPG_OPTS="--ignore-time-conflict --ignore-valid-from --yes --batch"
 
