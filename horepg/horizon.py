@@ -20,27 +20,30 @@ def debug_json(data):
   debug(json.dumps(data, sort_keys=True, indent=4))
 
 class HorizonRequest(object):
-  hosts = ['web-api-salt.horizon.tv', 'web-api-salt.horizon.tv']
+  hosts = ['web-api-salt.horizon.tv', 'web-api-pepper.horizon.tv']
 
   def __init__(self):
     self.current = 0;
     self.connection = http.client.HTTPSConnection(HorizonRequest.hosts[self.current])
 
-  def request(self, method, path):
+  def request(self, method, path, retry=True):
     self.connection.request(method, path)
     response = self.connection.getresponse()
     if(response.status == 200):
       return response
     elif(response.status == 403):
       # switch hosts
+      debug('Switching hosts')
       if(self.current == 0):
         self.current = 1
       else:
         self.current = 0
       self.connection = http.client.HTTPSConnection(HorizonRequest.hosts[self.current])
+      if(retry):
+        return self.request(method, path, retry=False)
     else:
       debug('Failed to request data from Horizon API, HTTP status {:0}'.format(response.status))
-    return False
+    return response
 
 class ChannelMap(object):
   path = '/oesp/api/NL/nld/web/channels/'
