@@ -95,6 +95,7 @@ if __name__ == '__main__':
   parser.add_argument('-u', nargs='?', metavar='USER', dest='as_user', default='hts', type=str, help='run as USER')
   parser.add_argument('-g', nargs='?', metavar='GROUP', dest='as_group', default='video', type=str, help='run as GROUP')
   parser.add_argument('-d', dest='daemonize', action='store_const', const=True, default=False, help='daemonize')
+  parser.add_argument('-1', dest='single_shot', action='store_const', const=True, default=False, help='Run once, then exit')
   parser.add_argument('-tvh', dest='tvh_host', metavar = 'HOST', default = 'localhost', help='the hostname of TVHeadend to fetch channels from')
   parser.add_argument('-tvh_username', dest='tvh_username', metavar = 'USERNAME', type=str, default = '', help='the username used to login into TVHeadend')
   parser.add_argument('-tvh_password', dest='tvh_password', metavar = 'PASSWORD', type=str, default = '', help='the password used to login into TVHeadend')
@@ -127,6 +128,9 @@ if __name__ == '__main__':
   channels = tvh_get_channels(args.tvh_host, username=args.tvh_username, password=args.tvh_password)
   debug('Fetching listings for {:d} channels'.format(len(channels)))
 
-  while True:
+  if args.single_shot:
     run_import(channels, args.tvhsocket, args.do_radio_epg)
-    time.sleep(60*60*24)
+  else:
+    while True:
+      run_import(channels, args.tvhsocket, args.do_radio_epg)
+      time.sleep(60*60*24)
