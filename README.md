@@ -51,6 +51,7 @@ optional arguments:
   -g [GROUP]            run as GROUP
   -d                    daemonize
   -1                    Run once, then exit
+  -nr [DAYS]            Number of days to fetch
   -tvh HOST             the hostname of TVHeadend to fetch channels from
   -tvh_username USERNAME
                         the username used to login into TVHeadend
