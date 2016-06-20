@@ -56,7 +56,7 @@ def daemonize():
   redirect_stream(sys.stdout)
   redirect_stream(sys.stderr)
 
-def run_import(wanted_channels, tvhsocket, fetch_radio=False):
+def run_import(wanted_channels, tvhsocket, fetch_radio=False, nr_days = 5):
   with TVHXMLTVSocket(tvhsocket) as tvh_client:
     # the Horizon API for TV channels
     chmap = ChannelMap()
@@ -74,7 +74,7 @@ def run_import(wanted_channels, tvhsocket, fetch_radio=False):
             icon = asset['url']
             break
         xmltv.addChannel(channel_id, channel['title'], icon)
-        for i in range(0, 5):
+        for i in range(0, nr_days):
           start = int((calendar.timegm(now) + 86400 * i) * 1000) # milis
           end = start + (86400 * 1000)
           nr = nr + listings.obtain(xmltv, channel_id, start, end)
@@ -84,7 +84,7 @@ def run_import(wanted_channels, tvhsocket, fetch_radio=False):
     # Oorboekje for radio channels
     if fetch_radio:
       parser = OorboekjeParser()
-      for i in range(0, 5):
+      for i in range(0, nr_days):
         start = time.time() + i*86400 + 100
         tvh_client.send(parser.get_day(start))
 
@@ -96,6 +96,7 @@ if __name__ == '__main__':
   parser.add_argument('-g', nargs='?', metavar='GROUP', dest='as_group', default='video', type=str, help='run as GROUP')
   parser.add_argument('-d', dest='daemonize', action='store_const', const=True, default=False, help='daemonize')
   parser.add_argument('-1', dest='single_shot', action='store_const', const=True, default=False, help='Run once, then exit')
+  parser.add_argument('-nr', nargs='?', metavar='DAYS', dest='nr_days', default=5, type=int, help='Number of days to fetch')
   parser.add_argument('-tvh', dest='tvh_host', metavar = 'HOST', default = 'localhost', help='the hostname of TVHeadend to fetch channels from')
   parser.add_argument('-tvh_username', dest='tvh_username', metavar = 'USERNAME', type=str, default = '', help='the username used to login into TVHeadend')
   parser.add_argument('-tvh_password', dest='tvh_password', metavar = 'PASSWORD', type=str, default = '', help='the password used to login into TVHeadend')
@@ -129,8 +130,8 @@ if __name__ == '__main__':
   debug('Fetching listings for {:d} channels'.format(len(channels)))
 
   if args.single_shot:
-    run_import(channels, args.tvhsocket, args.do_radio_epg)
+    run_import(channels, args.tvhsocket, args.do_radio_epg, args.nr_days)
   else:
     while True:
-      run_import(channels, args.tvhsocket, args.do_radio_epg)
+      run_import(channels, args.tvhsocket, args.do_radio_epg, args.nr_days)
       time.sleep(60*60*24)
