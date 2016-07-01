@@ -74,11 +74,9 @@ class OorboekjeParser(HTMLParser):
           self.state = OorboekjeParser.STATE_NEW_CHANNEL
 
     if(self.state == OorboekjeParser.STATE_NEW_CHANNEL):
-      if(tag == 'a'):
-        for (name, value) in attrs:
-          if(name == 'name'):
-            # handled in data
-            self.state = OorboekjeParser.STATE_NEW_CHANNEL_TITLE
+      if(tag == 'div'):
+        # handled in data
+        self.state = OorboekjeParser.STATE_NEW_CHANNEL_TITLE
     elif(self.state == OorboekjeParser.STATE_NEW_PROGRAMME):
       if(tag == 'div'):
         for (name, value) in attrs:
