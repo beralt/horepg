@@ -25,6 +25,12 @@ class HorizonRequest(object):
     def request(self, method, path, retry=True):
         self.connection.request(method, path)
         response = self.connection.getresponse()
+        if response.status == 500:
+            debug('Failed to request data from Horizon API, HTTP status {:0}'.format(response.status))
+            debug('Waiting for 5 seconds before trying again !')
+            time.sleep(5)
+            self.connection = http.client.HTTPSConnection(HorizonRequest.hosts[self.current])
+            return self.request(method, path, retry=True)
         if response.status == 200:
             return response
         elif response.status == 403:
