@@ -9,7 +9,8 @@ import socket
 
 def tvh_get_channels(host, port=9981, username='', password=''):
   channels = []
-  r = requests.get('http://{:s}:{:d}/api/channel/list'.format(host, port), auth=(username, password))
+  #r = requests.get('http://{:s}:{:d}/api/channel/list'.format(host, port), auth=(username, password))
+  r = requests.get('http://{:s}:{:d}/api/channel/list'.format(host, port))
   if r.status_code != 200:
     raise Exception('connection to tvheadend failed with status {:d}'.format(r.status_code))
   data = r.json()
