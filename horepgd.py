@@ -62,7 +62,7 @@ def daemonize():
     redirect_stream(sys.stdout)
     redirect_stream(sys.stderr)
 
-def run_import(wanted_channels, tvhsocket, fetch_radio=False, nr_days=5):
+def run_import(wanted_channels, tvhsocket, fetch_radio=False, nr_days=5, output_folder=None):
     with TVHXMLTVSocket(tvhsocket) as tvh_client:
         # the Horizon API for TV channels
         chmap = ChannelMap()
@@ -86,8 +86,13 @@ def run_import(wanted_channels, tvhsocket, fetch_radio=False, nr_days=5):
                     end = start + (86400 * 1000)
                     number = number + listings.obtain(xmltv, channel_id, start, end)
                 debug('Adding {:d} programmes for channel {:s}'.format(number, channel['title']))
-                # send this channel to tvh for processing
-                tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
+                if output_folder:
+                    channel_name = channel['title'].lower().replace("/", "_")
+                    with open(os.path.join(output_folder, "{}.xml".format(channel_name)), 'wb', ) as fd:
+                        fd.write(xmltv.document.toprettyxml(encoding='UTF-8'))
+                else:
+                    # send this channel to tvh for processing
+                    tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
         # Oorboekje for radio channels
         if fetch_radio:
             parser = OorboekjeParser()
@@ -108,6 +113,7 @@ def main():
     parser.add_argument('-tvh_username', dest='tvh_username', metavar='USERNAME', type=str, default='', help='the username used to login into TVHeadend')
     parser.add_argument('-tvh_password', dest='tvh_password', metavar='PASSWORD', type=str, default='', help='the password used to login into TVHeadend')
     parser.add_argument('-R', dest='do_radio_epg', action='store_const', const=True, default=False, help='fetch EPG data for radio channels')
+    parser.add_argument('-o', nargs='?', metavar='OUTPUTPATH', dest='output_path', default=None, type=str, help='so not send to TVHeadend but store to disk in OUTPUTPATH')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
@@ -116,7 +122,7 @@ def main():
         try:
             uid = pwd.getpwnam(args.as_user).pw_uid
             gid = grp.getgrnam(args.as_group).gr_gid
-        except KeyError:
+        except (KeyError, AttributeError):
             debug('Unable to find the user {0} and group {1} for daemonization'.format(args.as_user, args.as_group))
             sys.exit(1)
 
@@ -137,7 +143,7 @@ def main():
     debug('Fetching listings for {:d} channels'.format(len(channels)))
 
     if args.single_shot:
-        run_import(channels, args.tvhsocket, args.do_radio_epg, args.nr_days)
+        run_import(channels, args.tvhsocket, args.do_radio_epg, args.nr_days, args.output_path)
     else:
         while True:
             run_import(channels, args.tvhsocket, args.do_radio_epg, args.nr_days)
