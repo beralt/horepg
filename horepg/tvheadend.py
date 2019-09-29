@@ -6,10 +6,14 @@ Fetch a list of channels from TVHeadend
 
 import requests
 import socket
+from requests.auth import HTTPDigestAuth
 
 def tvh_get_channels(host, port=9981, username='', password=''):
   channels = []
   r = requests.get('http://{:s}:{:d}/api/channel/list'.format(host, port), auth=(username, password))
+  if r.status_code == 401:
+    # Retry with HTTP digest authentication
+    r = requests.get('http://{:s}:{:d}/api/channel/list'.format(host, port), auth=HTTPDigestAuth(username, password))
   if r.status_code != 200:
     raise Exception('connection to tvheadend failed with status {:d}'.format(r.status_code))
   data = r.json()
