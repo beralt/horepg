@@ -40,6 +40,7 @@ Usage
 usage: horepgd.py [-h] [-s [PATH]] [-p [PATH]] [-u [USER]] [-g [GROUP]] [-d]
                   [-tvh HOST] [-tvh_username USERNAME]
                   [-tvh_password PASSWORD] [-R]
+                  [-o [PATH]]
 
 Fetches EPG data from the Horizon service and passes it to TVHeadend.
 
@@ -58,6 +59,7 @@ optional arguments:
   -tvh_password PASSWORD
                         the password used to login into TVHeadend
   -R                    fetch EPG data for radio channels
+  -o                    path to output XML data instead of pushing to TVHeadend
 ```
 
 This would require some privileges to switch to the user and group if daemonizing. The script daemonizes by default, and logging is using syslog().
