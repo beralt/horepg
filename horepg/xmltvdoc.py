@@ -15,6 +15,9 @@ class XMLTVDocument(object):
   # this renames some of the channels
   add_display_name = {}
   category_map = {
+    # 00
+    'onbepaald': '',
+
     # 01
     'tv drama': 'movie/drama',
     'actie': 'movie/drama',
@@ -29,6 +32,7 @@ class XMLTVDocument(object):
     'komedie': 'comedy',
     'melodrama': 'soap/melodrama/folkloric',
     'romantiek': 'romance',
+    'romantisch': 'romance',
     'drama': 'serious/classical/religious/historical movie/drama',
     'erotiek': 'adult movie/drama',
 
@@ -42,7 +46,7 @@ class XMLTVDocument(object):
     'discussie': 'discussion/interview/debate',
 
     # 03
-    'show': 'game show/quiz/contest',
+    'show': 'show/game show',
     'variété': 'variety show',
     'variete': 'variety show',
     'talkshow': 'talk show',
@@ -180,12 +184,10 @@ class XMLTVDocument(object):
     if categories:
       for cat in categories:
         cat_title = XMLTVDocument.map_category(cat.lower())
-        if cat_title:
+        if cat_title is not None:
           self.quick_tag(element, 'category', cat_title)
         elif '/' not in cat:
-          warning(
-            "CHANNEL '{}', PROGRAM '{}': No XMLTV translation for category '{}'".format(channel_id, title,
-                                                                                        cat))
+          warning("CHANNEL '{}', PROGRAM '{}': No XMLTV translation for category '{}'".format(channel_id, title, cat))
           self.quick_tag(element, 'category', cat.lower())
         else:
           debug(
@@ -195,7 +197,7 @@ class XMLTVDocument(object):
   def map_category(cat):
     if cat in XMLTVDocument.category_map:
       return XMLTVDocument.category_map[cat]
-    return False
+    return None
 
   def quick_tag(self, parent, tag, content, attributes=False):
     element = self.document.createElement(tag)
