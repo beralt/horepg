@@ -81,9 +81,10 @@ def run_import(wanted_channels, tvhsocket, fetch_radio=False, nr_days=5, output_
                         icon = asset['url'][:p]
                         break
                 xmltv.addChannel(channel_id, channel['title'], icon)
-                for i in range(0, nr_days):
-                    start = int((calendar.timegm(now) + 86400 * i) * 1000) # milis
-                    end = start + (86400 * 1000)
+                # Fetch in blocks of 6 hours (8 hours is the maximum block size allowed)
+                for i in range(0, nr_days*4):
+                    start = int((calendar.timegm(now) + 21600 * i) * 1000) # milis
+                    end = start + (21600 * 1000)
                     number = number + listings.obtain(xmltv, channel_id, start, end)
                 debug('Adding {:d} programmes for channel {:s}'.format(number, channel['title']))
                 if output_folder:
