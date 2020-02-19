@@ -1,0 +1,2 @@
+#!/bin/sh
+docker build --build-arg REPOSITORY_URL=$REPOSITORY_URL -t $IMAGE_NAME .
