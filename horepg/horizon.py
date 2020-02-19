@@ -101,12 +101,17 @@ class Listings(object):
 def parse(raw, xmltv):
     # parse raw data
     data = json.loads(raw.decode('utf-8'))
+    invalid = 0
     for listing in data['listings']:
         if not 'program' in listing:
             debug('Listing has no programme field')
             continue
         if not 'title' in listing['program']:
             debug('Listing has programme, but programme has no title')
+            continue
+        if 'geen info beschikbaar' == listing['program']['title'].lower():
+            debug('Listing has programme, but programme has invalid title')
+            invalid = invalid + 1
             continue
 
         start = int(listing['startTime']) / 1000
@@ -139,4 +144,4 @@ def parse(raw, xmltv):
                 categories.append(cat['title'])
 
         xmltv.addProgramme(channel_id, title, start, end, episode, episode_title, description, categories)
-    return len(data['listings'])
+    return len(data['listings']) - invalid
