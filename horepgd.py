@@ -15,6 +15,7 @@ import argparse
 import time
 import datetime
 import calendar
+import re
 
 from horepg.horizon import ChannelMap, Listings
 from horepg.oorboekje import OorboekjeParser
@@ -67,9 +68,13 @@ def run_import(wanted_channels, tvhsocket, fetch_radio=False, nr_days=5, output_
         # the Horizon API for TV channels
         chmap = ChannelMap()
         listings = Listings()
+        non_hd_re = re.compile(r"\sHD(\s|$)", re.IGNORECASE)
         # add listings for each of the channels
         for channel_id, channel in chmap.channel_map.items():
-            if channel['title'].lower() in (channel.lower() for channel in wanted_channels):
+            title = channel['title']
+            non_hd_title = non_hd_re.sub("", title)
+            is_hd = title != non_hd_title
+            if title.lower() in (channel.lower() for channel in wanted_channels) or is_hd and non_hd_title.lower() in (channel.lower() for channel in wanted_channels):
                 now = datetime.date.today().timetuple()
                 number = 0
                 xmltv = XMLTVDocument()
@@ -80,21 +85,23 @@ def run_import(wanted_channels, tvhsocket, fetch_radio=False, nr_days=5, output_
                         p = asset['url'].find('?')
                         icon = asset['url'][:p]
                         break
-                xmltv.addChannel(channel_id, channel['title'], icon)
-                # Fetch in blocks of 6 hours (8 hours is the maximum block size allowed)
+                if is_hd and non_hd_title.lower() in (channel.lower() for channel in wanted_channels):
+                    xmltv.addChannel(channel_id, non_hd_title, icon)
+                xmltv.addChannel(channel_id, title, icon)
+                # fetch in blocks of 6 hours (8 hours is the maximum block size allowed)
                 for i in range(0, nr_days*4):
                     start = int((calendar.timegm(now) + 21600 * i) * 1000) # milis
                     end = start + (21600 * 1000)
                     number = number + listings.obtain(xmltv, channel_id, start, end)
-                debug('Adding {:d} programmes for channel {:s}'.format(number, channel['title']))
+                debug('Adding {:d} programmes for channel {:s} ({:s})'.format(number, non_hd_title, title))
                 if output_folder:
-                    channel_name = channel['title'].lower().replace("/", "_")
+                    channel_name = title.lower().replace("/", "_")
                     with open(os.path.join(output_folder, "{}.xml".format(channel_name)), 'wb', ) as fd:
                         fd.write(xmltv.document.toprettyxml(encoding='UTF-8'))
                 else:
                     # send this channel to tvh for processing
                     tvh_client.send(xmltv.document.toprettyxml(encoding='UTF-8'))
-        # Oorboekje for radio channels
+        # oorboekje for radio channels
         if fetch_radio:
             parser = OorboekjeParser()
             for i in range(0, nr_days):
