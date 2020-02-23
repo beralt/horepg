@@ -110,18 +110,19 @@ def run_import(wanted_channels, tvhsocket, fetch_radio=False, nr_days=5, output_
 
 def main():
     parser = argparse.ArgumentParser(description='Fetches EPG data from the Horizon service and passes it to TVHeadend.')
-    parser.add_argument('-s', nargs='?', metavar='PATH', dest='tvhsocket', default='/home/hts/.hts/tvheadend/epggrab/xmltv.sock', type=str, help='path to TVHeadend XMLTV socket')
-    parser.add_argument('-p', nargs='?', metavar='PATH', dest='pid_filename', default='/var/run/horepgd.pid', type=str, help='path to PID file')
-    parser.add_argument('-u', nargs='?', metavar='USER', dest='as_user', default='hts', type=str, help='run as USER')
-    parser.add_argument('-g', nargs='?', metavar='GROUP', dest='as_group', default='video', type=str, help='run as GROUP')
-    parser.add_argument('-d', dest='daemonize', action='store_const', const=True, default=False, help='daemonize')
+    parser.add_argument('-s', nargs='?', metavar='PATH', dest='tvhsocket', default='/home/hts/.hts/tvheadend/epggrab/xmltv.sock', type=str, help='Path to TVHeadend XMLTV socket')
+    parser.add_argument('-p', nargs='?', metavar='PATH', dest='pid_filename', default='/var/run/horepgd.pid', type=str, help='Path to PID file')
+    parser.add_argument('-u', nargs='?', metavar='USER', dest='as_user', default='hts', type=str, help='Run as USER')
+    parser.add_argument('-g', nargs='?', metavar='GROUP', dest='as_group', default='video', type=str, help='Run as GROUP')
+    parser.add_argument('-d', dest='daemonize', action='store_const', const=True, default=False, help='Daemonize')
     parser.add_argument('-1', dest='single_shot', action='store_const', const=True, default=False, help='Run once, then exit')
     parser.add_argument('-nr', nargs='?', metavar='DAYS', dest='nr_days', default=5, type=int, help='Number of days to fetch')
-    parser.add_argument('-tvh', dest='tvh_host', metavar='HOST', default='localhost', help='the hostname of TVHeadend to fetch channels from')
-    parser.add_argument('-tvh_username', dest='tvh_username', metavar='USERNAME', type=str, default='', help='the username used to login into TVHeadend')
-    parser.add_argument('-tvh_password', dest='tvh_password', metavar='PASSWORD', type=str, default='', help='the password used to login into TVHeadend')
-    parser.add_argument('-R', dest='do_radio_epg', action='store_const', const=True, default=False, help='fetch EPG data for radio channels')
-    parser.add_argument('-o', nargs='?', metavar='OUTPUTPATH', dest='output_path', default=None, type=str, help='so not send to TVHeadend but store to disk in OUTPUTPATH')
+    parser.add_argument('-tvh', dest='tvh_host', metavar='HOST', default='localhost', help='Hostname of TVHeadend to fetch channels from')
+    parser.add_argument('-tvh_username', dest='tvh_username', metavar='USERNAME', type=str, default='', help='Username used to login into TVHeadend')
+    parser.add_argument('-tvh_password', dest='tvh_password', metavar='PASSWORD', type=str, default='', help='Password used to login into TVHeadend')
+    parser.add_argument('-R', dest='do_radio_epg', action='store_const', const=True, default=False, help='Fetch EPG data for radio channels')
+    parser.add_argument('-o', nargs='?', metavar='OUTPUTPATH', dest='output_path', default=None, type=str, help='Do not send to TVHeadend but store to disk in OUTPUTPATH')
+    parser.add_argument('-i', nargs='?', metavar='INTERVAL', dest='interval', default=24, type=int, help='Fetch interval in hours when not running in run-once mode')
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.DEBUG)
@@ -150,12 +151,16 @@ def main():
     channels = tvh_get_channels(args.tvh_host, username=args.tvh_username, password=args.tvh_password)
     debug('Fetching listings for {:d} channels'.format(len(channels)))
 
+    if ars.interval <= 0:
+        debug('Given interval of {0} cannot be smaller than 1'.format(args.interval))
+        sys.exit(1)
+
     if args.single_shot:
         run_import(channels, args.tvhsocket, args.do_radio_epg, args.nr_days, args.output_path)
     else:
         while True:
             run_import(channels, args.tvhsocket, args.do_radio_epg, args.nr_days)
-            time.sleep(60*60*24)
+            time.sleep(60*60*args.interval)
 
 if __name__ == '__main__':
     main()

@@ -2,6 +2,8 @@ FROM python:alpine
 
 ARG REPOSITORY_URL=https://github.com/beralt/horepg.git
 ENV REPOSITORY_SOURCE_URL=$REPOSITORY_URL
+ENV INTERVAL=24
+ENV NUM_DAYS=5
 
 RUN apk update && apk upgrade && \
     apk add --no-cache bash git openssh
