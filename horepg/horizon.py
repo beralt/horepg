@@ -33,9 +33,9 @@ class HorizonRequest(object):
             return self.request(method, path, retry=True)
         if response.status == 200:
             return response
-        elif response.status == 403:
+        elif response.status in (403, 404):
             # switch hosts
-            debug('Switching hosts')
+            debug('Switching hosts due to status code {:0} from host {:s}'.format(response.status, HorizonRequest.hosts[self.current]))
             if self.current == 0:
                 self.current = 1
             else:
