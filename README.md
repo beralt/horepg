@@ -1,6 +1,8 @@
 horepg
 ======
 
+> :warning: **The API this project uses had been taken offline.** Fortunately a good replacement can be found here: https://github.com/jbogers/ziggogo-epg
+
 This simple script parses EPG data from the service at horizon.tv (which is used by a product sold by a digital cable provider in the Netherlands). The original data is formatted JSON. This script translated that to the XMLTV format and passes that to TVHeadend using the 'external grabber' interface. This interface is a Unix socket which is read by TVHeadend.
 
 The script fetches a channel list from TVHeadend, and tries to match channels found in the Horizon data to channels found in TVHeadend. As long as you keep the channel names as provided on the DVB-C network a match is very likely, and no configuration is required.
